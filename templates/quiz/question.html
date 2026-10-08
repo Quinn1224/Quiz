@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<article class="quiz-card" style="max-width: 650px; margin: 2rem auto;">
+    <header>
+        <div style="position: relative; display: flex; align-items: center; justify-content: flex-end;">
+        
+            <span class="category-badge"
+                style="position: absolute; left: 50%; transform: translateX(-50%); display: inline-block; border: 1px solid var(--shop-border); border-radius: 999px; padding: 0.55rem 0.9rem; margin: 10px 0;">Punktestand:
+                {{ statistics.total_score }}</span>
+            <form method="post" action="{% url 'quiz:question_detail' question.id %}" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" name="toggle_review" value="1"
+                    title="Frage zur manuellen Überprüfung markieren"
+                    style="background: transparent; border: 0; color: white; padding: 0; display: inline-flex; align-items: center;">
+                    {% if question.marked_for_review %}Markierung entf.{% else %}Frage markieren{% endif %}
+                </button>
+            </form>
+        </div>
+         <span class="category-badge">{{ question.category.name }}</span>
+          
+        {% if question.type == 'MC' %}
+        <h3 style="margin-top: 0.5rem;">{{ question.text }}</h3>
+        {% else %}
+        <img src="{{ question.image.url }}" alt="Image">
+        {%endif%}
+    </header>
+
+    <form method="post" action="{% url 'quiz:question_detail' question.id %}">
+        {% csrf_token %}
+
+        <fieldset class="answers-group">
+            {% for answer in answers %}
+            {% if evaluated %}
+            {# Farb-Kennzeichnung nach der Auswertung #}
+            <label class="answer-option
+                        {% if answer.is_correct %} answer-option--correct
+                        {% elif answer == selected_answer and not is_correct %} answer-option--incorrect
+                        {% else %} answer-option--muted
+                        {% endif %}">
+                <input type="radio" name="answer" value="{{ answer.id }}"
+                    style="appearance: auto !important; width: 1.25rem !important; height: 1.25rem !important; min-width: 1.25rem; min-height: 1.25rem; flex: 0 0 1.25rem; 
+                    aspect-ratio: 1 / 1; border-radius: 50% !important; border: 0;" {% if answer == selected_answer %}checked{% endif %} disabled>
+
+                <span>
+                    {{ answer.text }}
+                    {% if answer.is_correct %}
+                    <strong>✓ (Richtig)</strong>
+                    {% elif answer == selected_answer and not is_correct %}
+                    <strong>✗ (Deine Antwort)</strong>
+                    {% endif %}
+                </span>
+            </label>
+            {% else %}
+            {# Standard-Anzeige vor dem Absenden #}
+            <label style="margin-bottom: 0.5rem; display: flex; align-items: center;">
+                <input type="radio" name="answer" value="{{ answer.id }}" required
+                    style="appearance: auto !important; width: 1.25rem !important; height: 1.25rem !important; min-width: 1.25rem; min-height: 1.25rem; flex: 0 0 1.25rem; aspect-ratio: 1 / 1; border-radius: 50% !important; border: 0;">
+                <span>{{ answer.text }}</span>
+            </label>
+            {% endif %}
+            {% endfor %}
+        </fieldset>
+
+        {# Zusatzinformationen / Erklärung nach der Auswertung anzeigen #}
+        {% if evaluated %}
+        {% if selected_answer.additional_information %}
+        <div
+            style="margin: 1.5rem 0; padding: 1rem; background-color: var(--pico-card-background-color); border-left: 4px solid var(--pico-primary);">
+            <strong>Erklärung:</strong>
+            <p style="margin-bottom: 0;">{{ selected_answer.additional_information }}</p>
+        </div>
+        {% endif %}
+
+        <footer style="margin-top: 1.5rem;">
+            <a href="{% url 'quiz:next_question' %}" role="button" class="contrast"
+                style="width: 100%; text-align: center;">
+                Nächste Frage →
+            </a>
+        </footer>
+        {% else %}
+        <footer style="margin-top: 1.5rem;">
+            <button type="submit" class="primary" style="width: 100%;">Antwort einreichen</button>
+        </footer>
+        {% endif %}
+    </form>
+</article>
+{% endblock %}

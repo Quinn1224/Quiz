@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="max-width: 450px; margin: 2rem auto;">
+    <article>
+        <header>
+            <h3 style="margin: 0;">Anmelden</h3>
+        </header>
+
+        {% if form.errors %}
+            <p style="color: var(--pico-color-red-500, #d9381e); margin-bottom: 1rem;">
+                <small>Benutzername oder Passwort ist falsch. Bitte versuche es erneut.</small>
+            </p>
+        {% endif %}
+
+        <form method="post" action="{% url 'quiz:login' %}">
+            {% csrf_token %}
+            
+            <label for="id_username">
+                Benutzername
+                <input type="text" name="username" id="id_username" placeholder="Dein Spieler-Name" required autofocus>
+            </label>
+
+            <label for="id_password">
+                Passwort
+                <input type="password" name="password" id="id_password" required>
+            </label>
+
+            <button type="submit" class="primary" style="margin-top: 1rem;">Einloggen</button>
+            <input type="hidden" name="next" value="{{ next }}">
+        </form>
+    </article>
+</div>
+{% endblock %}
