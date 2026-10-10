@@ -9,12 +9,13 @@ ENV PYTHONUNBUFFERED=1
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
-
+ 
 RUN pip install --upgrade pip
-
+  
 COPY requirements.txt /code/
-
+    
 RUN pip install --no-cache-dir -r requirements.txt gunicorn
+
 
 
 # Stage 2: Production
@@ -26,12 +27,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends gosu && \
     groupadd -g 1000 appuser && \
     useradd -u 1000 -g appuser -s /bin/bash -m appuser
 
+
 WORKDIR /code
 
 COPY --from=builder /usr/local/lib/python3.13/site-packages/ /usr/local/lib/python3.13/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
 COPY --chown=appuser:appuser . .
+
+RUN python manage.py collectstatic --no-input 
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1 
