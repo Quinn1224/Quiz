@@ -1,1 +1,21 @@
-#ToDo
+services:
+  quiz:     
+    image: ghcr.io/quinn1224/quiz:latest
+    container_name: quiz
+    restart: always
+    volumes:
+      - ./data:/code/data
+      - ./media:/code/media
+      - ./static:/code/staticfiles 
+    env_file:
+      - ./.env
+
+    expose:
+      - "8000"
+
+    networks:
+      - proxy-net
+ 
+networks:
+  proxy-net:
+    external: true
