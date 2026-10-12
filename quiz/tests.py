@@ -80,3 +80,30 @@ class QuizViewTests(TestCase):
         self.assertEqual(progress.correct_attempts, 0)
         self.assertEqual(progress.false_attempts, 1)
         self.assertEqual(Statistics.objects.get(user=self.user).total_score, 0)
+
+    def test_leaderboard_lists_users_by_total_score(self):
+        other_user = get_user_model().objects.create_user(username="top-player")
+        Statistics.objects.create(user=self.user, total_score=5)
+        Statistics.objects.create(user=other_user, total_score=20)
+
+        response = self.client.get(reverse("quiz:leaderboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Bestenliste")
+        self.assertContains(response, "top-player")
+        self.assertContains(response, "quiz-user")
+        table_body = response.content.split(b"<tbody>", 1)[1].split(b"</tbody>", 1)[0]
+        self.assertLess(
+            table_body.index(b"top-player"),
+            table_body.index(b"quiz-user"),
+        )
+
+    def test_leaderboard_requires_login(self):
+        self.client.logout()
+
+        response = self.client.get(reverse("quiz:leaderboard"))
+
+        self.assertRedirects(
+            response,
+            f"{reverse('quiz:login')}?next={reverse('quiz:leaderboard')}",
+        )

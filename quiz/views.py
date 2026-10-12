@@ -84,4 +84,11 @@ def question_detail_view(request : HttpRequest, question_id: int):
     }
     return render(request, 'quiz/question.html', context)
 
- 
+@login_required
+def leaderboard_view(request : HttpRequest):
+    stats = Statistics.objects.select_related('user').order_by('-total_score', 'user__username')
+
+    context = {
+        'statistics': stats,
+    }
+    return render(request, 'quiz/leaderboard.html', context)

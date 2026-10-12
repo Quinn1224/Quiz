@@ -49,6 +49,7 @@
 
                 {% if user.is_authenticated %}
                 <li class="nav-link">User: <strong>{{ user.username }}</strong></li>
+                <li><a href="{% url 'quiz:leaderboard' %}" class="nav-link">Leaderboard</a></li>
                 <li>
                     <form action="{% url 'quiz:logout' %}" method="post" class="nav-logout-form">
                         {% csrf_token %}

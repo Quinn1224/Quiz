@@ -10,5 +10,6 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(next_page='quiz:login'), name='logout'),
     path('next/', views.next_question_view, name='next_question'),
     path('question/<int:question_id>/', views.question_detail_view, name='question_detail'),
+    path('leaderboard/', views.leaderboard_view, name='leaderboard'),
     path('', RedirectView.as_view(pattern_name='quiz:login'), name='quiz_redirect'),
 ]

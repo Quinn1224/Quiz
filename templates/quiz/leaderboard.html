@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<article class="quiz-card" style="max-width: 800px; margin: 2rem auto;">
+    <header>
+        <center>
+        <h1>Leaderboard</h1>
+        </center>
+    </header>
+
+    {% if statistics %}
+    <figure>
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Platz</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Punkte</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in statistics %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ entry.user.username }}</td>
+                    <td>{{ entry.total_score }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </figure>
+    {% else %}
+    <p>Noch gibt es keine Einträge in der Bestenliste.</p>
+    {% endif %}
+</article>
+{% endblock %}
