@@ -89,7 +89,7 @@ class QuizViewTests(TestCase):
         response = self.client.get(reverse("quiz:leaderboard"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Bestenliste")
+        self.assertContains(response, "Leaderboard")
         self.assertContains(response, "top-player")
         self.assertContains(response, "quiz-user")
         table_body = response.content.split(b"<tbody>", 1)[1].split(b"</tbody>", 1)[0]
