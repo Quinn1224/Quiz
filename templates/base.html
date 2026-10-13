@@ -16,7 +16,7 @@
     <link rel="icon" type="image/x-icon" href="{% static 'favicon/favicon.ico' %}">
     <script>
         const savedTheme = localStorage.getItem('shop-theme');
-        if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+        document.documentElement.dataset.theme = savedTheme || 'light';
     </script>
 </head>
 
