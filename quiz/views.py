@@ -11,12 +11,12 @@ def next_question_view(request : HttpRequest):
     user = request.user
 
     solved_question_ids = QuestionProgress.objects.filter(user = user, correct_attempts__gt = 0).values_list('question_id', flat=True)
-    open_questions = Question.objects.filter(type=Question.Type.MULTIPLE_CHOICE).exclude(id__in=solved_question_ids)
+    open_questions = Question.objects.filter(type='mutiple_choice').exclude(id__in=solved_question_ids)
 
     if(open_questions.exists()):
         question = random.choice(list(open_questions))
     else: 
-        all_questions = Question.objects.filter(type = Question.Type.MULTIPLE_CHOICE)
+        all_questions = Question.objects.filter(type = 'mutiple_choice')
         if not all_questions.exists():
             return render(request, 'quiz/no_questions.html')
 
