@@ -29,7 +29,11 @@ class Question(models.Model):
     ]
     text = models.CharField(max_length=1000, verbose_name='Fragetext')
     category = models.ForeignKey(Category, on_delete=models.PROTECT, verbose_name='Kategorie')
-    type = models.CharField(max_length=50, choices=OPTION_TYPES, default=OPTION_TYPES[0])
+    type = models.CharField(
+        max_length=50,
+        choices=OPTION_TYPES,
+        default=OPTION_TYPES[0][0],
+    )
     points = models.SmallIntegerField(default=0, verbose_name='Punkte')
     image = models.ImageField(upload_to='quiz/questions/', null=True, blank=True, verbose_name='Bild')
     marked_for_review = models.BooleanField(default=False, verbose_name='Zur Prüfung markiert')
@@ -49,10 +53,6 @@ class Question(models.Model):
     def __str__(self):
         return f"{self.text[:50]}"    
 
-    def clean(self):
-        super().clean()
-        if self.type == 'mutiple_choice' and not self.image:
-            raise ValidationError({'image': 'Für Multiple Choice (Bild) ist ein Bild erforderlich.'})
 
  #Modeliert eine Antwort
 class Answer(models.Model):

@@ -20,7 +20,7 @@
         </div>
          <span class="category-badge">{{ question.category.name }}</span>
           
-        {% if question.type == 'MC' %}
+        {% if not question.image %}
         <h3 style="margin-top: 0.5rem;">{{ question.text }}</h3>
         {% else %}
         <img src="{{ question.image.url }}" alt="Image">
