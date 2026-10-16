@@ -23,6 +23,15 @@ class QuestionAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.CharField: {'widget': forms.Textarea(attrs={'rows': 2, 'cols': 80})},
     }
+    ## Edit Add Delete für Kategorie abschalten
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name == 'category' and formfield:
+            formfield.widget.can_add_related = False
+            formfield.widget.can_change_related = False
+            formfield.widget.can_delete_related = False
+            formfield.widget.can_view_related = False
+        return formfield
 
 
 class QuestionGroupItemFormSet(BaseInlineFormSet):
@@ -30,6 +39,7 @@ class QuestionGroupItemFormSet(BaseInlineFormSet):
         super().add_fields(form, index)
 
         if self.instance.pk:
+            # Bereits zugeordnete Fragen aus den Auswahlfeldern anderer Einträge entfernen.
             assigned_question_ids = self.model.objects.filter(
                 **{self.fk.name: self.instance}
             ).values_list('question_id', flat=True)
@@ -37,12 +47,14 @@ class QuestionGroupItemFormSet(BaseInlineFormSet):
             form.fields['question'].queryset = form.fields['question'].queryset.exclude(
                 pk__in=assigned_question_ids
             )
+            # Die Frage des aktuellen Eintrags bleibt trotz Filter auswählbar.
             if current_question_id:
                 form.fields['question'].queryset = (
                     form.fields['question'].queryset
                     | form.fields['question'].queryset.model.objects.filter(pk=current_question_id)
                 )
 
+            # Neue Formulare erhalten fortlaufende Positionswerte nach den vorhandenen Einträgen.
             if index is not None and index >= self.initial_form_count():
                 last_position = self.model.objects.filter(
                     **{self.fk.name: self.instance}
@@ -52,15 +64,13 @@ class QuestionGroupItemFormSet(BaseInlineFormSet):
                 )
 
     def save_new(self, form, commit=True):
-        obj = form.save(commit=False)
+        # Neue Frage hinter dem bisherigen letzten Eintrag positionieren.
+        # Das Basis-FormSet speichert das Formular und setzt dabei den Gruppen-Fremdschlüssel.
         last_position = self.model.objects.filter(
             **{self.fk.name: self.instance}
         ).aggregate(last_position=models.Max('position'))['last_position'] or 0
-        obj.position = last_position + 1
-        if commit:
-            obj.save()
-            self.save_m2m()
-        return obj
+        form.instance.position = last_position + 1
+        return super().save_new(form, commit=commit)
 
 
 class QuestionGroupItemInline(admin.TabularInline):
