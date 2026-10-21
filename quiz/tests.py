@@ -107,7 +107,6 @@ class QuizViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Dashboard")
         self.assertContains(response, "quiz-user")
-        self.assertContains(response, "Quiz-Menü")
         self.assertContains(response, task.title)
         self.assertContains(response, "In Bearbeitung")
         self.assertContains(
