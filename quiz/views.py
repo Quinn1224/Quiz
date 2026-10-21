@@ -3,25 +3,120 @@ from django.http import HttpRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from .models import Question, Answer, QuestionProgress, Statistics
+from django.db.models import Count, Q
+from django.utils import timezone
+from .models import (
+    Answer,
+    Category,
+    Question,
+    QuestionGroup,
+    QuestionProgress,
+    Statistics,
+)
 
 # Create your views here.
 @login_required
 def next_question_view(request : HttpRequest):
     user = request.user
 
-    solved_question_ids = QuestionProgress.objects.filter(user = user, correct_attempts__gt = 0).values_list('question_id', flat=True)
-    open_questions = Question.objects.filter(type='mutiple_choice').exclude(id__in=solved_question_ids)
+    question_pool = Question.objects.filter(type='mutiple_choice')
+    group_id = request.GET.get('group')
+    if group_id:
+        current_time = timezone.now()
+        question_group = get_object_or_404(
+            QuestionGroup.objects.filter(
+                is_published=True,
+                user_group__in=user.groups.all(),
+            )
+            .filter(
+                Q(available_from__isnull=True)
+                | Q(available_from__lte=current_time),
+                Q(due_date__isnull=True) | Q(due_date__gte=current_time),
+            )
+            .distinct(),
+            pk=group_id,
+        )
+        question_pool = question_pool.filter(
+            group_items__question_group=question_group,
+        )
+
+    selected_categories = request.GET.getlist('category')
+    if selected_categories:
+        category_ids = [
+            category_id
+            for category_id in selected_categories
+            if category_id.isdecimal()
+        ]
+        question_pool = question_pool.filter(category_id__in=category_ids)
+
+    solved_question_ids = QuestionProgress.objects.filter(
+        user=user,
+        correct_attempts__gt=0,
+    ).values_list('question_id', flat=True)
+    open_questions = question_pool.exclude(id__in=solved_question_ids).distinct()
 
     if(open_questions.exists()):
         question = random.choice(list(open_questions))
     else: 
-        all_questions = Question.objects.filter(type = 'mutiple_choice')
+        all_questions = question_pool.distinct()
         if not all_questions.exists():
             return render(request, 'quiz/no_questions.html')
 
         question = random.choice(list(all_questions))
     return redirect('quiz:question_detail', question_id=question.id)
+
+@login_required
+def dashboard_view(request: HttpRequest):
+    user = request.user
+    statistics = Statistics.objects.filter(user=user).first()
+    total_questions = Question.objects.filter(type='mutiple_choice').count()
+    solved_questions = QuestionProgress.objects.filter(
+        user=user,
+        correct_attempts__gt=0,
+        question__type='mutiple_choice',
+    ).count()
+    progress_percent = round(solved_questions / total_questions * 100) if total_questions else 0
+
+    current_time = timezone.now()
+    question_groups = (
+        QuestionGroup.objects.filter(
+            is_published=True,
+            user_group__in=user.groups.all(),
+        )
+        .filter(
+            Q(available_from__isnull=True) | Q(available_from__lte=current_time),
+            Q(due_date__isnull=True) | Q(due_date__gte=current_time),
+        )
+        .distinct()
+        .annotate(
+            total_questions=Count(
+                'items',
+                filter=Q(items__question__type='mutiple_choice'),
+                distinct=True,
+            ),
+            completed_questions=Count(
+                'items__question__question_progress',
+                filter=Q(
+                    items__question__type='mutiple_choice',
+                    items__question__question_progress__user=user,
+                    items__question__question_progress__correct_attempts__gt=0,
+                ),
+                distinct=True,
+            ),
+        )
+        .order_by('-created')
+    )
+
+    context = {
+        'categories': Category.objects.order_by('name'),
+        'question_groups': question_groups,
+        'total_score': statistics.total_score if statistics else 0,
+        'total_questions': total_questions,
+        'solved_questions': solved_questions,
+        'progress_percent': progress_percent,
+        'gauge_rotation': round(progress_percent * 1.8 - 90),
+    }
+    return render(request, 'quiz/dashboard.html', context)
 
 
 @login_required

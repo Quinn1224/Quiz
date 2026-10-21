@@ -206,6 +206,82 @@ main.container {
     align-items: center;
 }
 
+.nav-dropdown {
+    display: none;
+}
+
+.nav-dropdown details {
+    margin: 0;
+    position: relative;
+}
+
+.nav-dropdown summary {
+    align-items: center;
+    border: 1px solid var(--shop-border);
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    gap: 0.45rem;
+    list-style: none;
+    min-height: 2.5rem;
+    padding: 0.45rem 0.8rem;
+}
+
+.nav-dropdown summary::-webkit-details-marker {
+    display: none;
+}
+
+.nav-dropdown summary::after {
+    border-bottom: 1.5px solid currentColor;
+    border-right: 1.5px solid currentColor;
+    content: "";
+    height: 0.4rem;
+    transform: rotate(45deg) translateY(-2px);
+    width: 0.4rem;
+}
+
+.nav-dropdown details[open] summary::after {
+    transform: rotate(225deg) translate(-2px, -1px);
+}
+
+.nav-dropdown-menu {
+    background: var(--shop-surface);
+    border: 1px solid var(--shop-border);
+    border-radius: 0.85rem;
+    box-shadow: var(--shop-shadow);
+    min-width: 10rem;
+    padding: 0.35rem;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    z-index: 20;
+}
+
+.nav-dropdown-menu a {
+    border-radius: 0.55rem;
+    color: var(--shop-ink);
+    display: block;
+    padding: 0.6rem 0.75rem;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.nav-dropdown-menu a:hover,
+.nav-dropdown-menu a:focus-visible {
+    background: var(--shop-surface-soft);
+    color: var(--shop-accent);
+}
+
+@media (max-width: 1000px) {
+    .site-nav li.nav-learning-link {
+        display: none;
+    }
+
+    .site-nav li.nav-dropdown {
+        display: list-item;
+    }
+}
+
 @media (max-width: 700px) {
     .site-nav {
         display: flex;
@@ -228,9 +304,12 @@ main.container {
     .site-nav > ul:not(.site-nav-brand) {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        flex-wrap: wrap;
+        gap: 0.55rem 0.75rem;
+        justify-content: space-between;
         margin: 0;
         padding: 0;
+        width: 100%;
     }
 
 

@@ -1,8 +1,17 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group as AuthGroup
 
-from .models import Answer, Category, Question, QuestionProgress, Statistics
+from .models import (
+    Answer,
+    Category,
+    Question,
+    QuestionGroup,
+    QuestionGroupItem,
+    QuestionProgress,
+    Statistics,
+)
 
 
 class QuizModelTests(TestCase):
@@ -49,6 +58,73 @@ class QuizViewTests(TestCase):
         self.assertRedirects(
             response,
             reverse("quiz:question_detail", args=[self.question.pk]),
+        )
+
+    def test_next_question_filters_by_selected_category(self):
+        geography = Category.objects.create(name="Geografie")
+        geography_question = Question.objects.create(
+            text="Welche Stadt liegt an der Isar?",
+            category=geography,
+        )
+
+        response = self.client.get(
+            reverse("quiz:next_question"),
+            {"category": geography.pk},
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("quiz:question_detail", args=[geography_question.pk]),
+        )
+
+    def test_dashboard_shows_assigned_tasks_and_progress(self):
+        auth_group = AuthGroup.objects.create(name="Spieler")
+        self.user.groups.add(auth_group)
+        task = QuestionGroup.objects.create(
+            title="Wöchentlicher Test",
+            description="Wöchentlicher Wissenstest",
+            is_published=True,
+        )
+        task.user_group.add(auth_group)
+        QuestionGroupItem.objects.create(question_group=task, question=self.question)
+        second_question = Question.objects.create(
+            text="Welches Tier legt Eier?",
+            category=self.question.category,
+        )
+        QuestionGroupItem.objects.create(
+            question_group=task,
+            question=second_question,
+            position=1,
+        )
+        QuestionProgress.objects.create(
+            user=self.user,
+            question=self.question,
+            correct_attempts=1,
+        )
+
+        response = self.client.get(reverse("quiz:dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Dashboard")
+        self.assertContains(response, "quiz-user")
+        self.assertContains(response, "Quiz-Menü")
+        self.assertContains(response, task.title)
+        self.assertContains(response, "In Bearbeitung")
+        self.assertContains(
+            response,
+            '<p class="dashboard-progress-percent">50<span>%</span></p>',
+            html=True,
+        )
+        self.assertContains(response, "Biologie")
+
+    def test_dashboard_requires_login(self):
+        self.client.logout()
+
+        response = self.client.get(reverse("quiz:dashboard"))
+
+        self.assertRedirects(
+            response,
+            f"{reverse('quiz:login')}?next={reverse('quiz:dashboard')}",
         )
 
     def test_question_page_contains_question_text(self):

@@ -1,5 +1,131 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="dashboard-page">
+    <header class="dashboard-heading">
+        <div>
+            <p class="dashboard-eyebrow">Erlangen Rebels · Football Quiz</p>
+            <h1>Dein Dashboard</h1>
+            <p class="dashboard-welcome">Schön, dass du da bist, <strong>{{ user.first_name|default:user.username }}</strong>.</p>
+        </div>
+        <a class="dashboard-button dashboard-quick-start" href="{% url 'quiz:next_question' %}">
+            Jetzt quizzen <span aria-hidden="true">→</span>
+        </a>
+    </header>
+
+    <div class="dashboard-layout">
+        <div class="dashboard-main">
+        <section class="dashboard-section" aria-labelledby="tasks-heading">
+            <div class="dashboard-section-heading">
+                <div>
+                    <p class="dashboard-eyebrow">Für dich bereit</p>
+                    <h2 id="tasks-heading">Aktuelle Aufgaben</h2>
+                </div>
+                <span class="dashboard-section-icon" aria-hidden="true">✦</span>
+            </div>
+            {% if question_groups %}
+            <div class="dashboard-table-wrap">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Aufgabe</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Deadline</th>
+                            <th scope="col">Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in question_groups %}
+                        <tr>
+                            <th scope="row">{{ task.title }}</th>
+                            <td>
+                                {% if task.total_questions == 0 %}
+                                <span class="dashboard-status dashboard-status--empty">Keine Fragen</span>
+                                {% elif task.completed_questions >= task.total_questions %}
+                                <span class="dashboard-status dashboard-status--done">Abgeschlossen</span>
+                                {% elif task.completed_questions > 0 %}
+                                <span class="dashboard-status dashboard-status--progress">In Bearbeitung</span>
+                                {% else %}
+                                <span class="dashboard-status dashboard-status--open">Offen</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if task.due_date %}
+                                {{ task.due_date|date:"d.m.Y" }}
+                                {% else %}
+                                —
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if task.total_questions %}
+                                <a class="dashboard-button dashboard-button--small"
+                                    href="{% url 'quiz:next_question' %}?group={{ task.pk }}">
+                                    {% if task.completed_questions >= task.total_questions %}
+                                    Wiederholen
+                                    {% else %}
+                                    Starten
+                                    {% endif %}
+                                </a>
+                                {% else %}
+                                —
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="dashboard-empty">Zurzeit sind keine Aufgaben für dich verfügbar.</p>
+            {% endif %}
+        </section>
+
+        <section class="dashboard-section dashboard-practice" aria-labelledby="practice-heading">
+            <div class="dashboard-section-heading">
+                <div>
+                    <p class="dashboard-eyebrow">In deinem Tempo</p>
+                    <h2 id="practice-heading">Freies Üben</h2>
+                </div>
+                <span class="dashboard-section-icon" aria-hidden="true">◎</span>
+            </div>
+            <p class="dashboard-section-description">Wähle ein oder mehrere Themen aus – oder starte direkt mit allen Fragen.</p>
+            {% if categories %}
+            <form action="{% url 'quiz:next_question' %}" method="get">
+                <fieldset class="dashboard-categories">
+                    <legend class="visually-hidden">Themenbereiche auswählen</legend>
+                    {% for category in categories %}
+                    <label class="dashboard-category">
+                        <input type="checkbox" name="category" value="{{ category.pk }}">
+                        <span>{{ category.name }}</span>
+                    </label>
+                    {% endfor %}
+                </fieldset>
+                <button class="dashboard-button" type="submit">Starten</button>
+            </form>
+            {% else %}
+            <p class="dashboard-empty">Es sind noch keine Themenbereiche angelegt.</p>
+            {% endif %}
+        </section>
+        </div>
+
+        <aside class="dashboard-stats" aria-labelledby="statistics-heading">
+            <div class="dashboard-stats-card">
+                <p class="dashboard-eyebrow">Dein Überblick</p>
+                <h2 id="statistics-heading">Statistik</h2>
+                <div class="dashboard-score-card">
+                    <span class="dashboard-score-label">Punktestand</span>
+                    <p class="dashboard-score">{{ total_score }} <span>Punkte</span></p>
+                </div>
+
+                
+                <p class="dashboard-progress">{{ solved_questions }} von {{ total_questions }} Fragen richtig beantwortet</p>
+                <p class="dashboard-progress-percent">{{ progress_percent }}<span>%</span></p>
+                <a class="dashboard-button dashboard-leaderboard" href="{% url 'quiz:leaderboard' %}">
+                    Zum Leaderboard <span aria-hidden="true">→</span>
+                </a>
+            </div>
+        </aside>
+    </div>
+</div>
 
 {% endblock %}
