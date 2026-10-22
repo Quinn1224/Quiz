@@ -485,10 +485,30 @@
 }
 
 @media (max-width: 600px) {
+    .dashboard-page {
+        margin-top: -1.5rem;
+    }
+
     .dashboard-heading {
         align-items: stretch;
         flex-direction: column;
         gap: 1.1rem;
+        margin-bottom: 1rem;
+        padding: 1.25rem;
+    }
+
+    .dashboard-layout,
+    .dashboard-main {
+        gap: 1rem;
+    }
+
+    .dashboard-section {
+        padding: 1.1rem;
+    }
+
+    .dashboard-section-heading h2,
+    .dashboard-stats-card h2 {
+        font-size: 1.2rem;
     }
 
     .dashboard-quick-start,
@@ -497,7 +517,72 @@
     }
 
     .dashboard-table {
-        min-width: 520px;
+        display: block;
+        min-width: 0;
+    }
+
+    .dashboard-table thead {
+        clip: rect(0, 0, 0, 0);
+        clip-path: inset(50%);
+        height: 1px;
+        overflow: hidden;
+        position: absolute;
+        white-space: nowrap;
+        width: 1px;
+    }
+
+    .dashboard-table tbody {
+        display: grid;
+        gap: 0.65rem;
+    }
+
+    .dashboard-table tbody tr {
+        background: var(--shop-surface);
+        border: 1px solid var(--shop-border);
+        border-radius: 0.75rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        overflow: hidden;
+    }
+
+    .dashboard-table tbody tr:last-child th,
+    .dashboard-table tbody tr:last-child td {
+        border-bottom: 1px solid var(--shop-border);
+    }
+
+    .dashboard-table tbody th {
+        border-bottom: 1px solid var(--shop-border);
+        grid-column: 1 / -1;
+        overflow-wrap: anywhere;
+        padding: 0.8rem;
+    }
+
+    .dashboard-table tbody td {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        min-width: 0;
+        padding: 0.7rem 0.8rem;
+    }
+
+    .dashboard-table tbody td::before {
+        color: var(--shop-muted);
+        content: attr(data-label);
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .dashboard-table tbody td:last-child {
+        align-items: flex-end;
+        border-top: 1px solid var(--shop-border);
+        grid-column: 1 / -1;
+        text-align: right;
+    }
+
+    .dashboard-table .dashboard-button {
+        min-height: 2.75rem;
     }
 
     .dashboard-categories {
@@ -507,6 +592,15 @@
 
     .dashboard-category {
         border-radius: 0.75rem;
+        min-height: 2.75rem;
         width: 100%;
+    }
+
+    .dashboard-stats-card {
+        padding: 1.25rem;
+    }
+
+    .dashboard-score-card {
+        margin-top: 0.9rem;
     }
 }

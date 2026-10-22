@@ -14,6 +14,29 @@
     <link rel="stylesheet" href="{% static 'base.css' %}">
     <link rel="stylesheet" href="{% static 'quiz.css' %}">
     <link rel="icon" type="image/x-icon" href="{% static 'favicon/favicon.ico' %}">
+    <style>
+        .site-footer {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+        }
+
+        @media (max-width: 600px) {
+            .site-footer {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+                padding-block: 1rem;
+                text-align: center;
+            }
+
+            .site-footer > div {
+                flex-wrap: wrap;
+                justify-content: center;
+                row-gap: 0.25rem;
+            }
+        }
+    </style>
     <script>
         const savedTheme = localStorage.getItem('shop-theme');
         document.documentElement.dataset.theme = savedTheme || 'light';
@@ -44,14 +67,12 @@
             </ul>
 
 
-            <ul>
+            <ul class="site-nav-links">
                 <!-- Gemeinsame Authentifizierung & Utility Links -->
 
                 {% if user.is_authenticated %}
-                <li class="nav-link">User: <strong>{{ user.username }}</strong></li>
                 <li class="nav-learning-link"><a href="{% url 'quiz:dashboard' %}" class="nav-link">Dashboard</a></li>
-                <li class="nav-learning-link"><a href="{% url 'quiz:leaderboard' %}" class="nav-link">Leaderboard</a></li>
-                
+      
                 <li>
                     <form action="{% url 'quiz:logout' %}" method="post" class="nav-logout-form">
                         {% csrf_token %}
@@ -59,10 +80,9 @@
                     </form>
                 </li>
                 {% else %}
-                <li><a href="{% url 'quiz:login' %}" class="nav-link nav-button">Login</a></li>
                 {% endif %}
                 <!-- Dark/Light Theme Toggle -->
-                <li>
+                <li class="nav-right-group-start">
                     <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Farbschema wechseln"
                         title="Farbschema wechseln">◐</button>
                 </li>
@@ -127,8 +147,7 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="container site-footer"
-        style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;">
+    <footer class="container site-footer">
         <small>&copy; Erlangen Rebels 2026</small>
         <div style="display: flex; justify-content: center; gap: 0.5rem;">
             <a href="{% url 'impressum' %}">Impressum</a>

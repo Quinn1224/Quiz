@@ -4,13 +4,9 @@
 <div class="dashboard-page">
     <header class="dashboard-heading">
         <div>
-            <p class="dashboard-eyebrow">Erlangen Rebels · Football Quiz</p>
             <h1>Dein Dashboard</h1>
-            <p class="dashboard-welcome">Schön, dass du da bist, <strong>{{ user.first_name|default:user.username }}</strong>.</p>
+            <p class="dashboard-eyebrow">Hallo <strong>{{ user.first_name|default:user.username }}</strong>.</p>
         </div>
-        <a class="dashboard-button dashboard-quick-start" href="{% url 'quiz:next_question' %}">
-            Jetzt quizzen <span aria-hidden="true">→</span>
-        </a>
     </header>
 
     <div class="dashboard-layout">
@@ -18,7 +14,6 @@
         <section class="dashboard-section" aria-labelledby="tasks-heading">
             <div class="dashboard-section-heading">
                 <div>
-                    <p class="dashboard-eyebrow">Für dich bereit</p>
                     <h2 id="tasks-heading">Aktuelle Aufgaben</h2>
                 </div>
                 <span class="dashboard-section-icon" aria-hidden="true">✦</span>
@@ -38,7 +33,7 @@
                         {% for task in question_groups %}
                         <tr>
                             <th scope="row">{{ task.title }}</th>
-                            <td>
+                            <td data-label="Status">
                                 {% if task.total_questions == 0 %}
                                 <span class="dashboard-status dashboard-status--empty">Keine Fragen</span>
                                 {% elif task.completed_questions >= task.total_questions %}
@@ -49,14 +44,14 @@
                                 <span class="dashboard-status dashboard-status--open">Offen</span>
                                 {% endif %}
                             </td>
-                            <td>
+                            <td data-label="Deadline">
                                 {% if task.due_date %}
                                 {{ task.due_date|date:"d.m.Y" }}
                                 {% else %}
                                 —
                                 {% endif %}
                             </td>
-                            <td>
+                            <td data-label="Aktion">
                                 {% if task.total_questions %}
                                 <a class="dashboard-button dashboard-button--small"
                                     href="{% url 'quiz:next_question' %}?group={{ task.pk }}">
@@ -83,7 +78,6 @@
         <section class="dashboard-section dashboard-practice" aria-labelledby="practice-heading">
             <div class="dashboard-section-heading">
                 <div>
-                    <p class="dashboard-eyebrow">In deinem Tempo</p>
                     <h2 id="practice-heading">Freies Üben</h2>
                 </div>
                 <span class="dashboard-section-icon" aria-hidden="true">◎</span>
@@ -110,7 +104,6 @@
 
         <aside class="dashboard-stats" aria-labelledby="statistics-heading">
             <div class="dashboard-stats-card">
-                <p class="dashboard-eyebrow">Dein Überblick</p>
                 <h2 id="statistics-heading">Statistik</h2>
                 <div class="dashboard-score-card">
                     <span class="dashboard-score-label">Punktestand</span>
@@ -121,7 +114,7 @@
                 <p class="dashboard-progress">{{ solved_questions }} von {{ total_questions }} Fragen richtig beantwortet</p>
                 <p class="dashboard-progress-percent">{{ progress_percent }}<span>%</span></p>
                 <a class="dashboard-button dashboard-leaderboard" href="{% url 'quiz:leaderboard' %}">
-                    Zum Leaderboard <span aria-hidden="true">→</span>
+                    Zum Leaderboard 
                 </a>
             </div>
         </aside>

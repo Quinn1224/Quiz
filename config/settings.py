@@ -132,5 +132,5 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
 # Login & Logout Konfiguration
 LOGIN_URL = 'quiz:login'                  # Name der Login-URL
-LOGIN_REDIRECT_URL = 'quiz:next_question'  # Wohin nach erfolgtem Login weitergeleitet wird
+LOGIN_REDIRECT_URL = 'quiz:dashboard'  # Wohin nach erfolgtem Login weitergeleitet wird
 LOGOUT_REDIRECT_URL = 'quiz:login'        # Wohin nach dem Logout weitergeleitet wird

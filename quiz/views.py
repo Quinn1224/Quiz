@@ -118,7 +118,6 @@ def dashboard_view(request: HttpRequest):
     }
     return render(request, 'quiz/dashboard.html', context)
 
-
 @login_required
 def question_detail_view(request : HttpRequest, question_id: int):
     question = get_object_or_404(Question, id=question_id)
